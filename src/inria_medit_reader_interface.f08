@@ -48,4 +48,4 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
     module procedure read_file
     end procedure read_file
 
-end submodule
+end submodule inria_medit_file_implementation

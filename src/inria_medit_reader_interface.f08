@@ -133,6 +133,22 @@ module inria_medit_reader_interface
     end interface
     ! for `statement_stat_t`
 
+
+
+    interface is_iostat_end
+
+        module pure elemental function is_iostat_end_statement_stat(statement_stat)
+
+            type(statement_stat_t), intent(in) :: statement_stat
+            !! A dummy argument for this FUNCTION
+
+            logical :: is_iostat_end_statement_stat
+            !! The return value of this FUNCTION
+
+        end function is_iostat_end_statement_stat
+
+    end interface is_iostat_end
+
 end module inria_medit_reader_interface
 
 
@@ -166,6 +182,12 @@ submodule (inria_medit_reader_interface) statement_stat_implementation
 
     implicit none
     contains
+
+
+
+    module procedure is_iostat_end_statement_stat
+        is_iostat_end_statement_stat = is_iostat_end(statement_stat%number)
+    end procedure is_iostat_end_statement_stat
 
 
 

@@ -18,6 +18,7 @@ module inria_medit_reader_interface
 
 
 
+    ! for `inria_medit_file_t`
     interface
 
         module subroutine read_file(inria_medit_file, file)
@@ -33,6 +34,7 @@ module inria_medit_reader_interface
         end subroutine read_file
 
     end interface
+    ! for `inria_medit_file_t`
 
 end module inria_medit_reader_interface
 

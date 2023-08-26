@@ -20,6 +20,21 @@ module inria_medit_reader_interface
 
 
 
+    type :: io_unit_t
+    ! A `TYPE` to retain the unit number to read a file
+
+        integer, private :: number
+        !! Retaining the unit number to read a file
+
+        contains
+
+        procedure, pass, private :: close_file
+        procedure, pass, private :: open_file
+
+    end type io_unit_t
+
+
+
     type :: statement_stat_t
     ! A `TYPE` to receive `IOSTAT` &  `IOMSG`
     ! A `TYPE` to receive   `STAT` & `ERRMSG`
@@ -51,6 +66,9 @@ module inria_medit_reader_interface
 
     type :: inria_medit_file_t
     ! A `TYPE` to read INRIA MEDIT mesh file
+
+        type(io_unit_t), public :: io_unit
+        ! A field to retain the unit number to read a file
 
         type(statement_stat_t), public :: statement_stat = DEFAULT_STATEMENT_STAT
         !! A field to receive `IOSTAT` &  `IOMSG`
@@ -94,6 +112,44 @@ module inria_medit_reader_interface
 
     end interface
     ! for `inria_medit_file_t`
+
+
+
+    ! for `io_unit_t`
+    interface
+
+        module subroutine close_file(io_unit, statement_stat)
+
+            class(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Specify the device number (file) to close
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `IOSTAT` & `IOMSG`
+
+        end subroutine close_file
+
+
+
+        module subroutine open_file(io_unit, file, statement_stat)
+
+            class(io_unit_t), intent(inout) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Receive the device number (file) to open
+
+            character(len=*), intent(in) :: file
+            !! A dummy argument for this SUBROUTINE
+            !! The path of a file for reading
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `IOSTAT` & `IOMSG`
+
+        end subroutine open_file
+
+    end interface
+    ! for `io_unit_t`
 
 
 
@@ -177,6 +233,27 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
 
         call inria_medit_file%reset_fields()
 
+
+
+        ! try to open the target file
+
+        call inria_medit_file%io_unit%open_file( &!
+            file           = file                            , &!
+            statement_stat = inria_medit_file%statement_stat   &!
+        )
+
+        if ( .not. inria_medit_file%statement_stat%is_OK() ) then
+            return
+        end if
+
+
+
+        ! try to close the read file
+
+        call inria_medit_file%io_unit%close_file( &!
+            statement_stat = inria_medit_file%statement_stat &!
+        )
+
     end procedure read_file
 
 
@@ -188,6 +265,44 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
     end procedure reset_fields_inria_medit_file
 
 end submodule inria_medit_file_implementation
+
+
+
+submodule (inria_medit_reader_interface) io_unit_implementation
+
+    implicit none
+    contains
+
+
+
+    module procedure close_file
+
+        close( &!
+            unit   = io_unit%number        , &!
+            iomsg  = statement_stat%msg(:) , &!
+            iostat = statement_stat%number , &!
+            status = 'keep'                  &!
+        )
+
+    end procedure close_file
+
+
+
+    module procedure open_file
+
+        open( &!
+            file    = file                  , &!
+            newunit = io_unit%number        , &!
+            action  ='read'                 , &!
+            form    = 'formatted'           , &!
+            iomsg   = statement_stat%msg(:) , &!
+            iostat  = statement_stat%number , &!
+            status  = 'old'                   &! 
+        )
+
+    end procedure open_file
+
+end submodule io_unit_implementation
 
 
 

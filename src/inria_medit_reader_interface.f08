@@ -7,6 +7,11 @@ module inria_medit_reader_interface
 
 
 
+    logical, parameter, private :: DEFAULT_DATA_FIELD_AVAILABILITY = .false.
+    !! Default value: whether the data file is available
+
+
+
     integer, parameter, private :: DEFAULT_STATEMENT_STAT_NUMBER = 0
     !! Default number: `IOSTAT` or `STAT`
 
@@ -73,7 +78,8 @@ module inria_medit_reader_interface
 
         contains
 
-        procedure, pass, public :: is_available
+        procedure, pass, public  :: is_available
+        procedure, pass, private :: reset_availability
 
     end type data_field_t
 
@@ -112,6 +118,15 @@ module inria_medit_reader_interface
             !! The return value of this FUNCTION
 
         end function is_available
+
+
+
+        module subroutine reset_availability(data_field)
+
+            class(data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+        end subroutine reset_availability
 
     end interface
     ! for `data_field_t`
@@ -265,6 +280,12 @@ submodule (inria_medit_reader_interface) data_field_implementation
     module procedure is_available
         is_available = data_field%availability
     end procedure is_available
+
+
+
+    module procedure reset_availability
+        data_field%availability = DEFAULT_DATA_FIELD_AVAILABILITY
+    end procedure reset_availability
 
 end submodule data_field_implementation
 

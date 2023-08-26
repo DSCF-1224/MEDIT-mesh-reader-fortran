@@ -32,6 +32,7 @@ module inria_medit_reader_interface
 
         contains
 
+        procedure, pass, public  :: is_OK
         procedure, pass, public  :: output_msg
         procedure, pass, public  :: output_stat
         procedure, pass, private :: reset_fields_statement_stat
@@ -98,6 +99,18 @@ module inria_medit_reader_interface
 
     ! for `statement_stat_t`
     interface
+
+        module pure elemental function is_OK(statement_stat)
+
+            class(statement_stat_t), intent(in) :: statement_stat
+            !! A dummy argument for this FUNCTION
+
+            logical :: is_OK
+            !! The return value of this FUNCTION
+
+        end function is_OK
+
+
 
         module pure elemental function output_msg(statement_stat) result(msg)
 
@@ -188,6 +201,12 @@ submodule (inria_medit_reader_interface) statement_stat_implementation
     module procedure is_iostat_end_statement_stat
         is_iostat_end_statement_stat = is_iostat_end(statement_stat%number)
     end procedure is_iostat_end_statement_stat
+
+
+
+    module procedure is_OK
+        is_OK = (statement_stat%number .eq. 0)
+    end procedure is_OK
 
 
 

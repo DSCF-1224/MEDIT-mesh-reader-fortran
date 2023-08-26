@@ -71,6 +71,10 @@ module inria_medit_reader_interface
         !! .true.  for the     recorded data field
         !! .false. for the NOT recorded data field
 
+        contains
+
+        procedure, pass, public :: is_available
+
     end type data_field_t
 
 
@@ -93,6 +97,24 @@ module inria_medit_reader_interface
         generic, private :: reset_fields => reset_fields_inria_medit_file
 
     end type inria_medit_file_t
+
+
+
+    ! for `data_field_t`
+    interface
+
+        module pure elemental function is_available(data_field)
+
+            class(data_field_t), intent(in) :: data_field
+            !! A dummy argument for this FUNCTION
+
+            logical :: is_available
+            !! The return value of this FUNCTION
+
+        end function is_available
+
+    end interface
+    ! for `data_field_t`
 
 
 
@@ -230,6 +252,21 @@ module inria_medit_reader_interface
     end interface is_iostat_end
 
 end module inria_medit_reader_interface
+
+
+
+submodule (inria_medit_reader_interface) data_field_implementation
+
+    implicit none
+    contains
+
+
+
+    module procedure is_available
+        is_available = data_field%availability
+    end procedure is_available
+
+end submodule data_field_implementation
 
 
 

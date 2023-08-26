@@ -65,6 +65,12 @@ module inria_medit_reader_interface
 
 
     type, abstract :: data_field_t
+
+        logical, private :: availability
+        !! Whether this is data field is available
+        !! .true.  for the     recorded data field
+        !! .false. for the NOT recorded data field
+
     end type data_field_t
 
 

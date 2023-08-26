@@ -64,6 +64,11 @@ module inria_medit_reader_interface
 
 
 
+    type, abstract :: data_field_t
+    end type data_field_t
+
+
+
     type :: inria_medit_file_t
     ! A `TYPE` to read INRIA MEDIT mesh file
 

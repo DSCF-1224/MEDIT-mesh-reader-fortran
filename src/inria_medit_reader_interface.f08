@@ -109,8 +109,11 @@ module inria_medit_reader_interface
 
         contains
 
-        procedure, pass, private :: is_header       => is_header_mesh_version
-        procedure, pass, private :: read_field_main => read_field_main_mesh_version
+        procedure, pass, private :: is_header             => is_header_mesh_version
+        procedure, pass, private :: output_version_number
+        procedure, pass, private :: read_field_main       => read_field_main_mesh_version
+
+        generic, public :: output_number => output_version_number
 
     end type mesh_version_t
 
@@ -407,6 +410,18 @@ module inria_medit_reader_interface
             !! The return value of this FUNCTION
 
         end function is_header_mesh_version
+
+
+
+        module pure elemental function output_version_number(mesh_version) result(version_number)
+
+            class(mesh_version_t), intent(in) :: mesh_version
+            !! A dummy argument for this FUNCTION
+
+            integer(INT32) :: version_number
+            !! The return value of this FUNCTION
+
+        end function
 
 
 
@@ -744,6 +759,12 @@ submodule (inria_medit_reader_interface) mesh_version_implementation
     module procedure is_header_mesh_version
         is_header = data_field%is_header_core( string(:), STR_HEADER(:) )
     end procedure is_header_mesh_version
+
+
+
+    module procedure output_version_number
+        version_number = mesh_version%number
+    end procedure output_version_number
 
 
 

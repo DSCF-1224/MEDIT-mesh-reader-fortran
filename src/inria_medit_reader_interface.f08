@@ -20,6 +20,9 @@ module inria_medit_reader_interface
     integer, parameter, private :: LEN_STATEMENT_STAT_MSG = 256
     !! Buffer size retaining `IOMSG` or `ERRMSG`
 
+    integer, parameter, private :: LEN_TEXT_LINE = 512
+    !! Buffer size retaining `IOMSG` or `ERRMSG`
+
 
 
     character(LEN_STATEMENT_STAT_MSG), parameter :: DEFAULT_STATEMENT_STAT_MSG = repeat(string=' ', ncopies=LEN_STATEMENT_STAT_MSG)
@@ -98,6 +101,9 @@ module inria_medit_reader_interface
 
     type :: inria_medit_file_t
     ! A `TYPE` to read INRIA MEDIT mesh file
+
+        character(len=LEN_TEXT_LINE), private :: text_line
+        !! Buffer of the read a single text line
 
         type(io_unit_t), public :: io_unit
         ! A field to retain the unit number to read a file

@@ -175,7 +175,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Specify the unit number to read a file
 
-            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            character(len=*), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
             !! Buffer of the read a single text line
 
@@ -198,7 +198,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Specify the unit number to read a file
 
-            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            character(len=*), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
             !! Buffer of the read a single text line
 
@@ -221,7 +221,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Specify the unit number to read a file
 
-            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            character(len=*), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
             !! Buffer of the read a single text line
 
@@ -256,7 +256,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Specify the unit number to read a file
 
-            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            character(len=*), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
             !! Buffer of the read a single text line
 

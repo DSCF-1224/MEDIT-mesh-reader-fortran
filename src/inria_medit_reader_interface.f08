@@ -99,6 +99,21 @@ module inria_medit_reader_interface
 
 
 
+    type, extends(data_field_t) :: mesh_version_t
+    ! A `TYPE` to retain a data field named `MeshVersionFormatted`
+
+        integer(INT32), private :: number
+        !! A field to retain the mesh version number
+
+        contains
+
+        procedure, pass, private :: is_header       => is_header_mesh_version
+        procedure, pass, private :: read_field_main => read_field_main_mesh_version
+
+    end type mesh_version_t
+
+
+
     type :: inria_medit_file_t
     ! A `TYPE` to read INRIA MEDIT mesh file
 
@@ -110,7 +125,10 @@ module inria_medit_reader_interface
 
         type(statement_stat_t), public :: statement_stat = DEFAULT_STATEMENT_STAT
         !! A field to receive `IOSTAT` &  `IOMSG`
-        !! A field to receive   `STAT` & `ERRMSG`
+        !! A field to receive   `STAT` & `ERRMSG
+
+        type(mesh_version_t), public :: mesh_version
+        !! A field to retain a data field named `MeshVersionFormatted`
 
         contains
 
@@ -371,6 +389,51 @@ module inria_medit_reader_interface
 
 
 
+    ! for `mesh_version_t`
+    interface
+
+        module pure elemental function is_header_mesh_version(data_field, string) result(is_header)
+
+            class(mesh_version_t), intent(in) :: data_field
+            !! A dummy argument for this FUNCTION
+
+            character(len=*), intent(in) :: string
+            !! A dummy argument for this FUNCTION
+            !! The target string of the check
+
+            logical :: is_header
+            !! The return value of this FUNCTION
+
+        end function is_header_mesh_version
+
+
+
+        module subroutine read_field_main_mesh_version(data_field, io_unit, text_line, statement_stat)
+
+            class(mesh_version_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+            !! A instance to store the read data
+
+            type(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Specify the unit number to read a file
+
+            character(len=*), intent(inout) :: text_line
+            !! A dummy argument for this SUBROUTINE
+            !! Buffer of the read a single text line
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive   `STAT` & `ERRMSG`
+            !! Receive `IOSTAT` &  `IOMSG`
+
+        end subroutine read_field_main_mesh_version
+
+    end interface
+    ! for `mesh_version_t`
+
+
+
     ! for `statement_stat_t`
     interface
 
@@ -624,6 +687,27 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
 
 
 
+        ! try to read a data field: `MeshVersionFormatted`
+
+        call inria_medit_file%mesh_version%read_field( &!
+            io_unit        = inria_medit_file%io_unit        , &!
+            text_line      = inria_medit_file%text_line(:)   , &!
+            statement_stat = inria_medit_file%statement_stat   &!
+        )
+
+        if ( .not. inria_medit_file%statement_stat%is_OK() ) then
+
+            inria_medit_file%text_line(:) &!
+            &   =  trim( inria_medit_file%text_line(:) )  &!
+            &   // new_line('')                           &!
+            &   // 'Failed to read a data field: `MeshVersionFormatted`'
+
+            return
+
+        end if
+
+
+
         ! try to close the read file
 
         call inria_medit_file%io_unit%close_file( &!
@@ -641,6 +725,46 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
     end procedure reset_fields_inria_medit_file
 
 end submodule inria_medit_file_implementation
+
+
+
+submodule (inria_medit_reader_interface) mesh_version_implementation
+
+    implicit none
+
+    character(len=*), parameter :: STR_HEADER = 'MeshVersionFormatted'
+    !! The header string of this data field
+
+    contains
+
+
+
+    module procedure is_header_mesh_version
+        is_header = data_field%is_header_core( string(:), STR_HEADER(:) )
+    end procedure is_header_mesh_version
+
+
+
+    module procedure read_field_main_mesh_version
+
+        associate( mesh_version => data_field )
+
+            call mesh_version%read_header_and_sub_int_data( &!
+                io_unit        = io_unit             , &!
+                text_line      = text_line(:)        , &!
+                sub_data       = mesh_version%number , &!
+                statement_stat = statement_stat        &!
+            )
+
+            if ( statement_stat%is_OK() ) then
+                mesh_version%availability = .true.
+            end if
+
+        end associate
+
+    end procedure read_field_main_mesh_version
+
+end submodule mesh_version_implementation
 
 
 

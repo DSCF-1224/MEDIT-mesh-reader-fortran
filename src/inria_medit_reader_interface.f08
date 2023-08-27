@@ -35,6 +35,7 @@ module inria_medit_reader_interface
 
         procedure, pass, private :: close_file
         procedure, pass, private :: open_file
+        procedure, pass, private :: output_number
         procedure, pass, private :: rewind_position
 
     end type io_unit_t
@@ -202,6 +203,18 @@ module inria_medit_reader_interface
 
     ! for `io_unit_t`
     interface
+
+        module pure elemental function output_number(io_unit) result(unit_number)
+
+            class(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this FUNCTION
+
+            integer :: unit_number
+            !! The return value of this FUNCTION
+
+        end function output_number
+
+
 
         module subroutine close_file(io_unit, statement_stat)
 
@@ -439,6 +452,11 @@ submodule (inria_medit_reader_interface) io_unit_implementation
         )
 
     end procedure open_file
+
+
+    module procedure output_number
+        unit_number = io_unit%number
+    end procedure output_number
 
 
 

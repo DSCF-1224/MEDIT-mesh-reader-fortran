@@ -1,5 +1,7 @@
 module inria_medit_reader_interface
 
+    use, intrinsic :: iso_fortran_env , only: INT32
+
     implicit none
 
     private

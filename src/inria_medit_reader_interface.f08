@@ -85,6 +85,7 @@ module inria_medit_reader_interface
         procedure,   pass, public  :: is_available
         procedure, nopass, private :: is_header_core
         procedure,   pass, private :: read_field
+        procedure,   pass, private :: read_header_and_sub_int_data
         procedure,   pass, private :: reset_availability
         procedure,   pass, private :: search_header
 
@@ -195,11 +196,38 @@ module inria_medit_reader_interface
 
             type(io_unit_t), intent(in) :: io_unit
             !! A dummy argument for this SUBROUTINE
-            !! Store the device number to read the target file
+            !! Specify the unit number to read a file
 
-            character(len=*), intent(inout) :: text_line
+            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
-            !! The buffer to read a text line from the target file
+            !! Buffer of the read a single text line
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive   `STAT` & `ERRMSG`
+            !! Receive `IOSTAT` &  `IOMSG`
+
+        end subroutine
+
+
+
+        module subroutine read_header_and_sub_int_data(data_field, io_unit, text_line, sub_data, statement_stat)
+
+            class(data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+            !! A instance to store the read data
+
+            type(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Specify the unit number to read a file
+
+            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            !! A dummy argument for this SUBROUTINE
+            !! Buffer of the read a single text line
+
+            integer(INT32), intent(out) :: sub_data
+            !! A dummy argument for this SUBROUTINE
+            !! Receive the read sub data with the data field header
 
             type(statement_stat_t), intent(inout) :: statement_stat
             !! A dummy argument for this SUBROUTINE
@@ -462,6 +490,45 @@ submodule (inria_medit_reader_interface) data_field_implementation
         )
 
     end procedure read_field
+
+
+
+    module procedure read_header_and_sub_int_data
+
+        integer :: index_space
+        !! A local variable for this PROCEDURE
+
+
+
+        index_space = index(string= trim( text_line(:) ) , substring=' ')
+
+
+
+        select case(index_space)
+
+            case(1:)
+
+                read( &!
+                    unit   = text_line( (index_space + 1): ) , &!
+                    fmt    = *                               , &!
+                    iostat = statement_stat%number           , &!
+                    iomsg  = statement_stat%msg(:)             &!
+                ) &!
+                sub_data
+
+            case default
+
+                read( &!
+                    unit   = io_unit%output_number() , &!
+                    fmt    = *                       , &!
+                    iostat = statement_stat%number   , &!
+                    iomsg  = statement_stat%msg(:)     &!
+                ) &!
+                sub_data
+
+        end select
+
+    end procedure read_header_and_sub_int_data
 
 
 

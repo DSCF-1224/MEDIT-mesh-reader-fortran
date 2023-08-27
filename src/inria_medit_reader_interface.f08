@@ -20,6 +20,9 @@ module inria_medit_reader_interface
     integer, parameter, private :: LEN_STATEMENT_STAT_MSG = 256
     !! Buffer size retaining `IOMSG` or `ERRMSG`
 
+    integer, parameter, private :: LEN_TEXT_LINE = 512
+    !! Buffer size retaining `IOMSG` or `ERRMSG`
+
 
 
     character(LEN_STATEMENT_STAT_MSG), parameter :: DEFAULT_STATEMENT_STAT_MSG = repeat(string=' ', ncopies=LEN_STATEMENT_STAT_MSG)
@@ -99,6 +102,9 @@ module inria_medit_reader_interface
     type :: inria_medit_file_t
     ! A `TYPE` to read INRIA MEDIT mesh file
 
+        character(len=LEN_TEXT_LINE), private :: text_line
+        !! Buffer of the read a single text line
+
         type(io_unit_t), public :: io_unit
         ! A field to retain the unit number to read a file
 
@@ -144,7 +150,7 @@ module inria_medit_reader_interface
             logical :: is_header
             !! The return value of this FUNCTION
 
-        end function
+        end function is_header_abstract
 
 
 
@@ -161,7 +167,7 @@ module inria_medit_reader_interface
             logical :: is_header
             !! The return value of this FUNCTION
 
-        end function
+        end function is_header_core
 
 
 
@@ -175,7 +181,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Specify the unit number to read a file
 
-            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            character(len=*), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
             !! Buffer of the read a single text line
 
@@ -198,7 +204,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Specify the unit number to read a file
 
-            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            character(len=*), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
             !! Buffer of the read a single text line
 
@@ -207,7 +213,7 @@ module inria_medit_reader_interface
             !! Receive   `STAT` & `ERRMSG`
             !! Receive `IOSTAT` &  `IOMSG`
 
-        end subroutine
+        end subroutine read_field_main_abstract
 
 
 
@@ -221,7 +227,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Specify the unit number to read a file
 
-            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            character(len=*), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
             !! Buffer of the read a single text line
 
@@ -234,7 +240,7 @@ module inria_medit_reader_interface
             !! Receive   `STAT` & `ERRMSG`
             !! Receive `IOSTAT` &  `IOMSG`
 
-        end subroutine
+        end subroutine read_header_and_sub_int_data
 
 
 
@@ -256,7 +262,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Specify the unit number to read a file
 
-            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            character(len=*), intent(inout) :: text_line
             !! A dummy argument for this SUBROUTINE
             !! Buffer of the read a single text line
 
@@ -461,7 +467,7 @@ submodule (inria_medit_reader_interface) data_field_implementation
             case default ; is_header = ( string( :(index_ - 1) ) .eq. string_header(:) )
         end select
 
-    end procedure
+    end procedure is_header_core
 
 
 

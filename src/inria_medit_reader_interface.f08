@@ -150,7 +150,7 @@ module inria_medit_reader_interface
             logical :: is_header
             !! The return value of this FUNCTION
 
-        end function
+        end function is_header_abstract
 
 
 
@@ -167,7 +167,7 @@ module inria_medit_reader_interface
             logical :: is_header
             !! The return value of this FUNCTION
 
-        end function
+        end function is_header_core
 
 
 
@@ -213,7 +213,7 @@ module inria_medit_reader_interface
             !! Receive   `STAT` & `ERRMSG`
             !! Receive `IOSTAT` &  `IOMSG`
 
-        end subroutine
+        end subroutine read_field_main_abstract
 
 
 
@@ -240,7 +240,7 @@ module inria_medit_reader_interface
             !! Receive   `STAT` & `ERRMSG`
             !! Receive `IOSTAT` &  `IOMSG`
 
-        end subroutine
+        end subroutine read_header_and_sub_int_data
 
 
 
@@ -467,7 +467,7 @@ submodule (inria_medit_reader_interface) data_field_implementation
             case default ; is_header = ( string( :(index_ - 1) ) .eq. string_header(:) )
         end select
 
-    end procedure
+    end procedure is_header_core
 
 
 

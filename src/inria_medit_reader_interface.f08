@@ -35,6 +35,7 @@ module inria_medit_reader_interface
 
         procedure, pass, private :: close_file
         procedure, pass, private :: open_file
+        procedure, pass, private :: rewind_position
 
     end type io_unit_t
 
@@ -232,6 +233,20 @@ module inria_medit_reader_interface
 
         end subroutine open_file
 
+
+
+        module subroutine rewind_position(io_unit, statement_stat)
+
+            class(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Specify the device number (file) to close
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `IOSTAT` & `IOMSG`
+
+        end subroutine rewind_position
+
     end interface
     ! for `io_unit_t`
 
@@ -424,6 +439,18 @@ submodule (inria_medit_reader_interface) io_unit_implementation
         )
 
     end procedure open_file
+
+
+
+    module procedure rewind_position
+
+        rewind( &!
+            unit   = io_unit%number         , &!
+            iostat = statement_stat%number  , &!
+            iomsg  = statement_stat%msg(:)    &!
+        )
+
+    end procedure rewind_position
 
 end submodule io_unit_implementation
 

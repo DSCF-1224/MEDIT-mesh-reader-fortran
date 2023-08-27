@@ -78,8 +78,11 @@ module inria_medit_reader_interface
 
         contains
 
-        procedure, pass, public  :: is_available
-        procedure, pass, private :: reset_availability
+        procedure,   pass, public  :: is_available
+        procedure, nopass, private :: is_header_core
+        procedure,   pass, private :: reset_availability
+
+        procedure(is_header_abstract), pass, deferred, private :: is_header
 
     end type data_field_t
 
@@ -118,6 +121,39 @@ module inria_medit_reader_interface
             !! The return value of this FUNCTION
 
         end function is_available
+
+
+
+        module pure elemental function is_header_abstract(data_field, string) result(is_header)
+
+            class(data_field_t), intent(in) :: data_field
+            !! A dummy argument for this FUNCTION
+
+            character(len=*), intent(in) :: string
+            !! A dummy argument for this FUNCTION
+            !! The target string of the check
+
+            logical :: is_header
+            !! The return value of this FUNCTION
+
+        end function
+
+
+
+        module pure elemental function is_header_core(string, string_header) result(is_header)
+
+            character(len=*), intent(in) :: string
+            !! A dummy argument for this FUNCTION
+            !! The target string of the check
+
+            character(len=*), intent(in) :: string_header
+            !! A dummy argument for this FUNCTION
+            !! The header being searching for
+
+            logical :: is_header
+            !! The return value of this FUNCTION
+
+        end function
 
 
 
@@ -280,6 +316,24 @@ submodule (inria_medit_reader_interface) data_field_implementation
     module procedure is_available
         is_available = data_field%availability
     end procedure is_available
+
+
+
+    module procedure is_header_core
+
+        integer :: index_
+        !! A local variable for this PROCEDURE
+
+
+
+        index_ = index(string=string(:), substring=' ')
+
+        select case (index_)
+            case(0)      ; is_header = ( string( :             ) .eq. string_header(:) )
+            case default ; is_header = ( string( :(index_ - 1) ) .eq. string_header(:) )
+        end select
+
+    end procedure
 
 
 

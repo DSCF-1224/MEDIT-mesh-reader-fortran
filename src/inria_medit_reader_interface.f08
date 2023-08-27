@@ -82,10 +82,12 @@ module inria_medit_reader_interface
 
         procedure,   pass, public  :: is_available
         procedure, nopass, private :: is_header_core
+        procedure,   pass, private :: read_field
         procedure,   pass, private :: reset_availability
         procedure,   pass, private :: search_header
 
-        procedure(is_header_abstract), pass, deferred, private :: is_header
+        procedure( is_header_abstract       ), pass, deferred, private :: is_header
+        procedure( read_field_main_abstract ), pass, deferred, private :: read_field_main
 
     end type data_field_t
 
@@ -157,6 +159,52 @@ module inria_medit_reader_interface
             !! The return value of this FUNCTION
 
         end function
+
+
+
+        module subroutine read_field(data_field, io_unit, text_line, statement_stat)
+
+            class(data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+            !! Retaining the read data
+
+            type(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Specify the unit number to read a file
+
+            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            !! A dummy argument for this SUBROUTINE
+            !! Buffer of the read a single text line
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive   `STAT` & `ERRMSG`
+            !! Receive `IOSTAT` &  `IOMSG`
+
+        end subroutine read_field
+
+
+
+        module subroutine read_field_main_abstract(data_field, io_unit, text_line, statement_stat)
+
+            class(data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+            !! A instance to store the read data
+
+            type(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Store the device number to read the target file
+
+            character(len=*), intent(inout) :: text_line
+            !! A dummy argument for this SUBROUTINE
+            !! The buffer to read a text line from the target file
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive   `STAT` & `ERRMSG`
+            !! Receive `IOSTAT` &  `IOMSG`
+
+        end subroutine
 
 
 
@@ -384,6 +432,34 @@ submodule (inria_medit_reader_interface) data_field_implementation
         end select
 
     end procedure
+
+
+
+    module procedure read_field
+
+        ! search the header of this data field
+
+        call data_field%search_header( &!
+            io_unit        = io_unit        , &!
+            text_line      = text_line      , &!
+            statement_stat = statement_stat   &!
+        )
+
+        if ( .not. statement_stat%is_OK() ) then
+            return
+        end if
+
+
+
+        ! read the main contents of this data field
+
+        call data_field%read_field_main( &!
+            io_unit        = io_unit        , &!
+            text_line      = text_line(:)   , &!
+            statement_stat = statement_stat   &!
+        )
+
+    end procedure read_field
 
 
 

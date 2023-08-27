@@ -83,6 +83,7 @@ module inria_medit_reader_interface
         procedure,   pass, public  :: is_available
         procedure, nopass, private :: is_header_core
         procedure,   pass, private :: reset_availability
+        procedure,   pass, private :: search_header
 
         procedure(is_header_abstract), pass, deferred, private :: is_header
 
@@ -165,6 +166,27 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
 
         end subroutine reset_availability
+
+
+
+        module subroutine search_header(data_field, io_unit, text_line, statement_stat)
+
+            class(data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Specify the unit number to read a file
+
+            character(len=LEN_TEXT_LINE), intent(inout) :: text_line
+            !! A dummy argument for this SUBROUTINE
+            !! Buffer of the read a single text line
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `IOSTAT` & `IOMSG`
+
+        end subroutine search_header
 
     end interface
     ! for `data_field_t`
@@ -368,6 +390,58 @@ submodule (inria_medit_reader_interface) data_field_implementation
     module procedure reset_availability
         data_field%availability = DEFAULT_DATA_FIELD_AVAILABILITY
     end procedure reset_availability
+
+
+
+    module procedure search_header
+
+        ! call `REWIND` statement
+
+        call io_unit%rewind_position(statement_stat)
+
+        if ( .not. statement_stat%is_OK() ) then
+            return
+        end if
+
+
+
+        judge_text_lines: &!
+        do
+
+            ! try to read a single text line from the target mesh file
+
+            read( &!
+                unit   = io_unit%output_number() , &!
+                fmt    = '(A)'                   , &!
+                iostat = statement_stat%number   , &!
+                iomsg  = statement_stat%msg(:)     &!
+            ) &!
+            text_line(:)
+
+            if ( .not. statement_stat%is_OK() ) then
+                return
+            end if
+
+
+
+            ! remove leading spaces
+
+            text_line(:) = adjustl( text_line(:) )
+
+
+
+            ! judge the read text line
+
+            if ( data_field%is_header( trim( text_line(:) ) ) ) then
+                return
+            else
+                cycle judge_text_lines
+            end if
+
+        end do &!
+        judge_text_lines
+
+    end procedure search_header
 
 end submodule data_field_implementation
 

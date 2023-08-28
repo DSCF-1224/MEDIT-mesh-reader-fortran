@@ -14,6 +14,9 @@ module inria_medit_reader_interface
 
 
 
+    integer, parameter, private :: DEFAULT_MESH_VERSION_NUMBER = 0
+    !! Default number: `MeshVersionFormatted`
+
     integer, parameter, private :: DEFAULT_STATEMENT_STAT_NUMBER = 0
     !! Default number: `IOSTAT` or `STAT`
 
@@ -89,13 +92,16 @@ module inria_medit_reader_interface
 
         procedure,   pass, public  :: is_available
         procedure, nopass, private :: is_header_core
+        procedure,   pass, private :: make_available
         procedure,   pass, private :: read_field
         procedure,   pass, private :: read_header_and_sub_int_data
         procedure,   pass, private :: reset_availability
+        procedure,   pass, private :: reset_field
         procedure,   pass, private :: search_header
 
-        procedure( is_header_abstract       ), pass, deferred, private :: is_header
-        procedure( read_field_main_abstract ), pass, deferred, private :: read_field_main
+        procedure( is_header_abstract         ), pass, deferred, private :: is_header
+        procedure( read_field_main_abstract   ), pass, deferred, private :: read_field_main
+        procedure( reset_fields_main_abstract ), pass, deferred, private :: reset_fields_main
 
     end type data_field_t
 
@@ -112,6 +118,7 @@ module inria_medit_reader_interface
         procedure, pass, private :: is_header             => is_header_mesh_version
         procedure, pass, private :: output_version_number
         procedure, pass, private :: read_field_main       => read_field_main_mesh_version
+        procedure, pass, private :: reset_fields_main     => reset_fields_main_mesh_version
 
         generic, public :: output_number => output_version_number
 
@@ -194,6 +201,16 @@ module inria_medit_reader_interface
 
 
 
+        module subroutine make_available(data_field)
+
+            class(data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+            !! Retaining the read data
+
+        end subroutine make_available
+
+
+
         module subroutine read_field(data_field, io_unit, text_line, statement_stat)
 
             class(data_field_t), intent(inout) :: data_field
@@ -273,6 +290,32 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
 
         end subroutine reset_availability
+
+
+
+        module subroutine reset_field(data_field, statement_stat)
+
+            class(data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine reset_field
+
+
+
+        module subroutine reset_fields_main_abstract(data_field, statement_stat)
+
+            class(data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine reset_fields_main_abstract
 
 
 
@@ -446,6 +489,20 @@ module inria_medit_reader_interface
 
         end subroutine read_field_main_mesh_version
 
+
+
+        module subroutine reset_fields_main_mesh_version(data_field, statement_stat)
+
+            class(mesh_version_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+            !! A instance to store the read data
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine reset_fields_main_mesh_version
+
     end interface
     ! for `mesh_version_t`
 
@@ -551,6 +608,12 @@ submodule (inria_medit_reader_interface) data_field_implementation
 
 
 
+    module procedure make_available
+        data_field%availability = .true.
+    end procedure make_available
+
+
+
     module procedure read_field
 
         ! search the header of this data field
@@ -562,7 +625,12 @@ submodule (inria_medit_reader_interface) data_field_implementation
         )
 
         if ( .not. statement_stat%is_OK() ) then
+
+            ! disable this instance
+            call data_field%reset_availability()
+
             return
+
         end if
 
 
@@ -574,6 +642,22 @@ submodule (inria_medit_reader_interface) data_field_implementation
             text_line      = text_line(:)   , &!
             statement_stat = statement_stat   &!
         )
+
+
+
+        ! check the statement stat
+        
+        if ( statement_stat%is_OK() ) then
+
+            ! make this instance available
+            call data_field%make_available()
+
+        else
+
+            ! disable this instance
+            call data_field%reset_availability()
+
+        end if
 
     end procedure read_field
 
@@ -621,6 +705,15 @@ submodule (inria_medit_reader_interface) data_field_implementation
     module procedure reset_availability
         data_field%availability = DEFAULT_DATA_FIELD_AVAILABILITY
     end procedure reset_availability
+
+
+
+    module procedure reset_field
+
+        call data_field%reset_availability()
+        call data_field%reset_fields_main(statement_stat)
+
+    end procedure reset_field
 
 
 
@@ -739,6 +832,12 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
 
         call inria_medit_file%statement_stat%reset_fields()
 
+        associate( statement_stat => inria_medit_file%statement_stat )
+
+            call inria_medit_file%mesh_version%reset_field(statement_stat)
+
+        end associate
+
     end procedure reset_fields_inria_medit_file
 
 end submodule inria_medit_file_implementation
@@ -834,13 +933,21 @@ submodule (inria_medit_reader_interface) mesh_version_implementation
                 statement_stat = statement_stat        &!
             )
 
-            if ( statement_stat%is_OK() ) then
-                mesh_version%availability = .true.
-            end if
-
         end associate
 
     end procedure read_field_main_mesh_version
+
+
+
+    module procedure reset_fields_main_mesh_version
+
+        associate( mesh_version => data_field )
+            mesh_version%number = DEFAULT_MESH_VERSION_NUMBER
+        end associate
+
+        call statement_stat%reset_fields()
+
+    end procedure reset_fields_main_mesh_version
 
 end submodule mesh_version_implementation
 

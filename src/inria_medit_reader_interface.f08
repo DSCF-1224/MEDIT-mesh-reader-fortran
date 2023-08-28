@@ -745,52 +745,6 @@ end submodule inria_medit_file_implementation
 
 
 
-submodule (inria_medit_reader_interface) mesh_version_implementation
-
-    implicit none
-
-    character(len=*), parameter :: STR_HEADER = 'MeshVersionFormatted'
-    !! The header string of this data field
-
-    contains
-
-
-
-    module procedure is_header_mesh_version
-        is_header = data_field%is_header_core( string(:), STR_HEADER(:) )
-    end procedure is_header_mesh_version
-
-
-
-    module procedure output_version_number
-        version_number = mesh_version%number
-    end procedure output_version_number
-
-
-
-    module procedure read_field_main_mesh_version
-
-        associate( mesh_version => data_field )
-
-            call mesh_version%read_header_and_sub_int_data( &!
-                io_unit        = io_unit             , &!
-                text_line      = text_line(:)        , &!
-                sub_data       = mesh_version%number , &!
-                statement_stat = statement_stat        &!
-            )
-
-            if ( statement_stat%is_OK() ) then
-                mesh_version%availability = .true.
-            end if
-
-        end associate
-
-    end procedure read_field_main_mesh_version
-
-end submodule mesh_version_implementation
-
-
-
 submodule (inria_medit_reader_interface) io_unit_implementation
 
     implicit none
@@ -843,6 +797,52 @@ submodule (inria_medit_reader_interface) io_unit_implementation
     end procedure rewind_position
 
 end submodule io_unit_implementation
+
+
+
+submodule (inria_medit_reader_interface) mesh_version_implementation
+
+    implicit none
+
+    character(len=*), parameter :: STR_HEADER = 'MeshVersionFormatted'
+    !! The header string of this data field
+
+    contains
+
+
+
+    module procedure is_header_mesh_version
+        is_header = data_field%is_header_core( string(:), STR_HEADER(:) )
+    end procedure is_header_mesh_version
+
+
+
+    module procedure output_version_number
+        version_number = mesh_version%number
+    end procedure output_version_number
+
+
+
+    module procedure read_field_main_mesh_version
+
+        associate( mesh_version => data_field )
+
+            call mesh_version%read_header_and_sub_int_data( &!
+                io_unit        = io_unit             , &!
+                text_line      = text_line(:)        , &!
+                sub_data       = mesh_version%number , &!
+                statement_stat = statement_stat        &!
+            )
+
+            if ( statement_stat%is_OK() ) then
+                mesh_version%availability = .true.
+            end if
+
+        end associate
+
+    end procedure read_field_main_mesh_version
+
+end submodule mesh_version_implementation
 
 
 

@@ -134,8 +134,8 @@ module inria_medit_reader_interface
 
         procedure, pass, private :: output_num_of_items
 
-        procedure( allocate_data_fields_abstract   ), pass, deferred, private :: allocate_data_fields
-        procedure( deallocate_data_fields_abstract ), pass, deferred, private :: deallocate_data_fields
+        procedure( allocate_fields_abstract   ), pass, deferred, private :: allocate_fields
+        procedure( deallocate_fields_abstract ), pass, deferred, private :: deallocate_fields
 
     end type allocatable_data_field_t
 
@@ -183,7 +183,7 @@ module inria_medit_reader_interface
 
 
 
-        module subroutine allocate_data_fields_abstract(data_field, statement_stat)
+        module subroutine allocate_fields_abstract(data_field, statement_stat)
 
             class(allocatable_data_field_t), intent(inout) :: data_field
             !! A dummy argument for this SUBROUTINE
@@ -192,11 +192,11 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Receive `STAT` & `ERRMSG`
 
-        end subroutine allocate_data_fields_abstract
+        end subroutine allocate_fields_abstract
 
 
 
-        module subroutine deallocate_data_fields_abstract(data_field, statement_stat)
+        module subroutine deallocate_fields_abstract(data_field, statement_stat)
 
             class(allocatable_data_field_t), intent(inout) :: data_field
             !! A dummy argument for this SUBROUTINE
@@ -205,7 +205,7 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Receive `STAT` & `ERRMSG`
 
-        end subroutine deallocate_data_fields_abstract
+        end subroutine deallocate_fields_abstract
 
     end interface
     ! for `allocatable_data_field_t`

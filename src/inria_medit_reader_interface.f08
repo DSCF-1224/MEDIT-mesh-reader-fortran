@@ -133,6 +133,7 @@ module inria_medit_reader_interface
         contains
 
         procedure, pass, private :: output_num_of_items
+        procedure, pass, private :: reallocate_fields
 
         procedure( allocate_fields_abstract   ), pass, deferred, private :: allocate_fields
         procedure( deallocate_fields_abstract ), pass, deferred, private :: deallocate_fields
@@ -206,6 +207,19 @@ module inria_medit_reader_interface
             !! Receive `STAT` & `ERRMSG`
 
         end subroutine deallocate_fields_abstract
+
+
+
+        module subroutine reallocate_fields(data_field, statement_stat)
+
+            class(allocatable_data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine reallocate_fields
 
     end interface
     ! for `allocatable_data_field_t`
@@ -646,6 +660,20 @@ submodule (inria_medit_reader_interface) allocatable_data_field_implementation
     module procedure output_num_of_items
         num_of_items = data_field%num_of_items
     end procedure output_num_of_items
+
+
+
+    module procedure reallocate_fields
+
+        call data_field%deallocate_fields(statement_stat)
+
+        if ( .not. statement_stat%is_OK() ) then
+            return
+        end if
+
+        call data_field%allocate_fields(statement_stat)
+
+    end procedure reallocate_fields
 
 end submodule allocatable_data_field_implementation
 

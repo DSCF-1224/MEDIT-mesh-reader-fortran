@@ -126,6 +126,16 @@ module inria_medit_reader_interface
 
 
 
+    type, extends(data_field_t), abstract :: allocatable_data_field_t
+
+        integer(INT32), private :: num_of_items
+
+        contains
+
+    end type allocatable_data_field_t
+
+
+
     type :: inria_medit_file_t
     ! A `TYPE` to read INRIA MEDIT mesh file
 

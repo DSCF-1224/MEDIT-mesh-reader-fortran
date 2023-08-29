@@ -17,6 +17,9 @@ module inria_medit_reader_interface
     integer, parameter, private :: DEFAULT_MESH_VERSION_NUMBER = 0
     !! Default number: `MeshVersionFormatted`
 
+    integer(INT32), parameter, private :: DEFAULT_NUM_OF_ITEMS = 0_INT32
+    !! Default number: the number of `ALLOCATABLE` items
+
     integer, parameter, private :: DEFAULT_STATEMENT_STAT_NUMBER = 0
     !! Default number: `IOSTAT` or `STAT`
 
@@ -134,6 +137,7 @@ module inria_medit_reader_interface
 
         procedure, pass, private :: output_num_of_items
         procedure, pass, private :: reallocate_fields
+        procedure, pass, private :: reset_num_of_items
 
         procedure( allocate_fields_abstract   ), pass, deferred, private :: allocate_fields
         procedure( deallocate_fields_abstract ), pass, deferred, private :: deallocate_fields
@@ -220,6 +224,15 @@ module inria_medit_reader_interface
             !! Receive `STAT` & `ERRMSG`
 
         end subroutine reallocate_fields
+
+
+
+        module subroutine reset_num_of_items(data_field)
+
+            class(allocatable_data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+        end subroutine reset_num_of_items
 
     end interface
     ! for `allocatable_data_field_t`
@@ -674,6 +687,12 @@ submodule (inria_medit_reader_interface) allocatable_data_field_implementation
         call data_field%allocate_fields(statement_stat)
 
     end procedure reallocate_fields
+
+
+
+    module procedure reset_num_of_items
+        data_field%num_of_items = DEFAULT_NUM_OF_ITEMS
+    end procedure reset_num_of_items
 
 end submodule allocatable_data_field_implementation
 

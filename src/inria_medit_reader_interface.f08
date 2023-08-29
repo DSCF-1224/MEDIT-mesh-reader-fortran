@@ -132,6 +132,8 @@ module inria_medit_reader_interface
 
         contains
 
+        procedure, pass, private :: output_num_of_items
+
     end type allocatable_data_field_t
 
 
@@ -160,6 +162,24 @@ module inria_medit_reader_interface
         generic, private :: reset_fields => reset_fields_inria_medit_file
 
     end type inria_medit_file_t
+
+
+
+    ! for `allocatable_data_field_t`
+    interface
+
+        module pure elemental function output_num_of_items(data_field) result(num_of_items)
+
+            class(allocatable_data_field_t), intent(in) :: data_field
+            !! A dummy argument for this FUNCTION
+
+            integer(INT32) :: num_of_items
+            !! The return value of this FUNCTION
+
+        end function output_num_of_items
+
+    end interface
+    ! for `allocatable_data_field_t`
 
 
 
@@ -584,6 +604,21 @@ module inria_medit_reader_interface
     end interface is_iostat_end
 
 end module inria_medit_reader_interface
+
+
+
+submodule (inria_medit_reader_interface) allocatable_data_field_implementation
+
+    implicit none
+    contains
+
+
+
+    module procedure output_num_of_items
+        num_of_items = data_field%num_of_items
+    end procedure output_num_of_items
+
+end submodule allocatable_data_field_implementation
 
 
 

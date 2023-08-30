@@ -17,6 +17,9 @@ module inria_medit_reader_interface
     integer, parameter, private :: DEFAULT_MESH_VERSION_NUMBER = 0
     !! Default number: `MeshVersionFormatted`
 
+    integer(INT32), parameter, private :: DEFAULT_NUM_OF_ITEMS = 0_INT32
+    !! Default number: the number of `ALLOCATABLE` items
+
     integer, parameter, private :: DEFAULT_STATEMENT_STAT_NUMBER = 0
     !! Default number: `IOSTAT` or `STAT`
 
@@ -126,6 +129,23 @@ module inria_medit_reader_interface
 
 
 
+    type, extends(data_field_t), abstract :: allocatable_data_field_t
+
+        integer(INT32), private :: num_of_items
+
+        contains
+
+        procedure, pass, private :: output_num_of_items
+        procedure, pass, private :: reallocate_fields
+        procedure, pass, private :: reset_num_of_items
+
+        procedure( allocate_fields_abstract   ), pass, deferred, private :: allocate_fields
+        procedure( deallocate_fields_abstract ), pass, deferred, private :: deallocate_fields
+
+    end type allocatable_data_field_t
+
+
+
     type :: inria_medit_file_t
     ! A `TYPE` to read INRIA MEDIT mesh file
 
@@ -150,6 +170,72 @@ module inria_medit_reader_interface
         generic, private :: reset_fields => reset_fields_inria_medit_file
 
     end type inria_medit_file_t
+
+
+
+    ! for `allocatable_data_field_t`
+    interface
+
+        module pure elemental function output_num_of_items(data_field) result(num_of_items)
+
+            class(allocatable_data_field_t), intent(in) :: data_field
+            !! A dummy argument for this FUNCTION
+
+            integer(INT32) :: num_of_items
+            !! The return value of this FUNCTION
+
+        end function output_num_of_items
+
+
+
+        module subroutine allocate_fields_abstract(data_field, statement_stat)
+
+            class(allocatable_data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine allocate_fields_abstract
+
+
+
+        module subroutine deallocate_fields_abstract(data_field, statement_stat)
+
+            class(allocatable_data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine deallocate_fields_abstract
+
+
+
+        module subroutine reallocate_fields(data_field, statement_stat)
+
+            class(allocatable_data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine reallocate_fields
+
+
+
+        module subroutine reset_num_of_items(data_field)
+
+            class(allocatable_data_field_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+        end subroutine reset_num_of_items
+
+    end interface
+    ! for `allocatable_data_field_t`
 
 
 
@@ -574,6 +660,41 @@ module inria_medit_reader_interface
     end interface is_iostat_end
 
 end module inria_medit_reader_interface
+
+
+
+submodule (inria_medit_reader_interface) allocatable_data_field_implementation
+
+    implicit none
+    contains
+
+
+
+    module procedure output_num_of_items
+        num_of_items = data_field%num_of_items
+    end procedure output_num_of_items
+
+
+
+    module procedure reallocate_fields
+
+        call data_field%deallocate_fields(statement_stat)
+
+        if ( .not. statement_stat%is_OK() ) then
+            return
+        end if
+
+        call data_field%allocate_fields(statement_stat)
+
+    end procedure reallocate_fields
+
+
+
+    module procedure reset_num_of_items
+        data_field%num_of_items = DEFAULT_NUM_OF_ITEMS
+    end procedure reset_num_of_items
+
+end submodule allocatable_data_field_implementation
 
 
 

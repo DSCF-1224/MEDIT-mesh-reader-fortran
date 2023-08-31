@@ -146,6 +146,18 @@ module inria_medit_reader_interface
 
 
 
+    type, extends(allocatable_data_field_t), abstract :: data_field_with_reference_number_t
+
+        integer(INT32), dimension(:), allocatable, private :: reference_number
+
+        contains
+
+        procedure, pass, public :: output_reference_number
+
+    end type data_field_with_reference_number_t
+
+
+
     type :: inria_medit_file_t
     ! A `TYPE` to read INRIA MEDIT mesh file
 
@@ -426,6 +438,27 @@ module inria_medit_reader_interface
 
     end interface
     ! for `data_field_t`
+
+
+
+    ! for `data_field_with_reference_number_t`
+    interface
+
+        module pure elemental function output_reference_number(data_field, index_item) result(reference_number)
+
+            class(data_field_with_reference_number_t), intent(in) :: data_field
+            !! A dummy argument for this FUNCTION
+
+            integer(INT32), intent(in) :: index_item
+            !! A dummy argument for this FUNCTION
+
+            integer(INT32) :: reference_number
+            !! The return value of this FUNCTION
+
+        end function output_reference_number
+
+    end interface
+    ! for `data_field_with_reference_number_t`
 
 
 
@@ -889,6 +922,22 @@ submodule (inria_medit_reader_interface) data_field_implementation
     end procedure search_header
 
 end submodule data_field_implementation
+
+
+
+submodule (inria_medit_reader_interface) data_field_with_reference_number_implementation
+
+    implicit none
+    contains
+
+
+
+    module procedure output_reference_number
+        reference_number = data_field%reference_number(index_item)
+    end procedure output_reference_number
+
+end submodule data_field_with_reference_number_implementation
+
 
 
 

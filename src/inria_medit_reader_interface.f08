@@ -113,11 +113,6 @@ module inria_medit_reader_interface
 
 
 
-    type, extends(data_field_t), abstract :: mesh_information_t
-    end type mesh_information_t
-
-
-
     type, extends(data_field_t) :: mesh_dimension_t
     ! A `TYPE` to retain a data field named `Dimension`
 

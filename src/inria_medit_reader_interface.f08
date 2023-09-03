@@ -231,6 +231,9 @@ module inria_medit_reader_interface
         type(mesh_dimension_t), public :: mesh_dimension
         !! A field to retain a data field named `Dimension`
 
+        type(vertices_t), public :: vertices
+        !! A field to retain a data field named `Vertices`
+
         contains
 
         procedure, pass, public  :: read_file
@@ -1236,6 +1239,29 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
 
 
 
+        ! try to read a data field: `Vertices`
+
+        call inria_medit_file%vertices%associate_dimension(inria_medit_file%mesh_dimension)
+
+        call inria_medit_file%vertices%read_field( &!
+            io_unit        = inria_medit_file%io_unit        , &!
+            text_line      = inria_medit_file%text_line(:)   , &!
+            statement_stat = inria_medit_file%statement_stat   &!
+        )
+
+        if ( .not. inria_medit_file%statement_stat%is_OK() ) then
+
+            inria_medit_file%text_line(:) &!
+            &   =  trim( inria_medit_file%text_line(:) )  &!
+            &   // new_line('')                           &!
+            &   // 'Failed to read a data field: `Vertices`'
+
+            return
+
+        end if
+
+
+
         ! try to close the read file
 
         call inria_medit_file%io_unit%close_file( &!
@@ -1252,8 +1278,13 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
 
         associate( statement_stat => inria_medit_file%statement_stat )
 
-            call inria_medit_file% mesh_version   %reset_field(statement_stat)
-            call inria_medit_file% mesh_dimension %reset_field(statement_stat)
+            call inria_medit_file%mesh_version%reset_field(statement_stat)
+            if ( .not. statement_stat%is_OK() ) return
+
+            call inria_medit_file%mesh_dimension%reset_field(statement_stat)
+            if ( .not. statement_stat%is_OK() ) return
+
+            call inria_medit_file%vertices%reset_field(statement_stat)
 
         end associate
 

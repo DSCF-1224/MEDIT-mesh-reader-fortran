@@ -183,6 +183,11 @@ module inria_medit_reader_interface
 
 
     type, extends(data_field_with_reference_number_t), abstract :: polytopes_t
+
+        contains
+
+        procedure( output_num_of_vertices_polytopes ), nopass, deferred, private :: output_num_of_vertices
+
     end type polytopes_t
 
 
@@ -717,6 +722,22 @@ module inria_medit_reader_interface
 
     end interface
     ! for `mesh_version_t`
+
+
+
+    ! for `polytopes_t`
+    interface
+
+        module pure elemental function output_num_of_vertices_polytopes() result(num_of_vertices)
+
+            logical :: num_of_vertices
+            !! The return value of this FUNCTION
+            !! the number of vertices constituting a polytopes
+
+        end function output_num_of_vertices_polytopes
+
+    end interface
+    ! for `polytopes_t`
 
 
 

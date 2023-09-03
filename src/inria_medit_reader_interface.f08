@@ -182,6 +182,11 @@ module inria_medit_reader_interface
 
 
 
+    type, extends(data_field_with_reference_number_t), abstract :: polytopes_t
+    end type polytopes_t
+
+
+
     type, extends(data_field_with_reference_number_t) :: vertices_t
     ! A `TYPE` to retain a data field named `Vertices`
 

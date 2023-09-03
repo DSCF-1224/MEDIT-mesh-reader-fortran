@@ -14,10 +14,8 @@ module inria_medit_reader_interface
 
 
 
-    integer, parameter, private :: DEFAULT_MESH_DIMENSION_NUMBER = 0
+    integer, parameter, private :: DEFAULT_MESH_INFORMATION_NUMBER = 0
     !! Default number: `Dimension`
-
-    integer, parameter, private :: DEFAULT_MESH_VERSION_NUMBER = 0
     !! Default number: `MeshVersionFormatted`
 
     integer(INT32), parameter, private :: DEFAULT_NUM_OF_ITEMS = 0_INT32
@@ -113,39 +111,41 @@ module inria_medit_reader_interface
 
 
 
-    type, extends(data_field_t) :: mesh_dimension_t
-    ! A `TYPE` to retain a data field named `Dimension`
+    type, extends(data_field_t), abstract :: mesh_information_t
+    ! A base `TYPE` to retain a data field named `Dimension`
+    ! A base `TYPE` to retain a data field named `MeshVersionFormatted`
 
         integer, private :: number
-        !! physical dimension of the read mesh data
+        !! A field to retain the mesh version number
+        !! A field to retain the physical dimension of the read mesh data
 
         contains
 
-        procedure, pass, private :: is_header               => is_header_mesh_dimension
-        procedure, pass, private :: output_dimension_number
-        procedure, pass, private :: read_field_main         => read_field_main_mesh_dimension
-        procedure, pass, private :: reset_fields_main       => reset_fields_main_mesh_dimension
+        procedure, pass, public  :: output_number
+        procedure, pass, private :: read_field_main   => read_field_main_mesh_information
+        procedure, pass, private :: reset_fields_main => reset_fields_main_mesh_information
 
-        generic, public :: output_number => output_dimension_number
+    end type mesh_information_t
+
+
+
+    type, extends(mesh_information_t) :: mesh_dimension_t
+    ! A `TYPE` to retain a data field named `Dimension`
+
+        contains
+
+        procedure, pass, private :: is_header => is_header_mesh_dimension
 
     end type mesh_dimension_t
 
 
 
-    type, extends(data_field_t) :: mesh_version_t
+    type, extends(mesh_information_t) :: mesh_version_t
     ! A `TYPE` to retain a data field named `MeshVersionFormatted`
-
-        integer(INT32), private :: number
-        !! A field to retain the mesh version number
 
         contains
 
-        procedure, pass, private :: is_header             => is_header_mesh_version
-        procedure, pass, private :: output_version_number
-        procedure, pass, private :: read_field_main       => read_field_main_mesh_version
-        procedure, pass, private :: reset_fields_main     => reset_fields_main_mesh_version
-
-        generic, public :: output_number => output_version_number
+        procedure, pass, private :: is_header => is_header_mesh_version
 
     end type mesh_version_t
 
@@ -598,23 +598,29 @@ module inria_medit_reader_interface
 
         end function is_header_mesh_dimension
 
+    end interface
+    ! for `mesh_dimension_t`
 
 
-        module pure elemental function output_dimension_number(mesh_dimension) result(dimension_number)
 
-            class(mesh_dimension_t), intent(in) :: mesh_dimension
+    ! for `mesh_information_t`
+    interface
+
+        module pure elemental function output_number(mesh_information) result(number)
+
+            class(mesh_information_t), intent(in) :: mesh_information
             !! A dummy argument for this FUNCTION
 
-            integer(INT32) :: dimension_number
+            integer(INT32) :: number
             !! The return value of this FUNCTION
 
-        end function
+        end function output_number
 
 
 
-        module subroutine read_field_main_mesh_dimension(data_field, io_unit, text_line, statement_stat)
+        module subroutine read_field_main_mesh_information(data_field, io_unit, text_line, statement_stat)
 
-            class(mesh_dimension_t), intent(inout) :: data_field
+            class(mesh_information_t), intent(inout) :: data_field
             !! A dummy argument for this SUBROUTINE
             !! A instance to store the read data
 
@@ -631,13 +637,13 @@ module inria_medit_reader_interface
             !! Receive   `STAT` & `ERRMSG`
             !! Receive `IOSTAT` &  `IOMSG`
 
-        end subroutine read_field_main_mesh_dimension
+        end subroutine read_field_main_mesh_information
 
 
 
-        module subroutine reset_fields_main_mesh_dimension(data_field, statement_stat)
+        module subroutine reset_fields_main_mesh_information(data_field, statement_stat)
 
-            class(mesh_dimension_t), intent(inout) :: data_field
+            class(mesh_information_t), intent(inout) :: data_field
             !! A dummy argument for this SUBROUTINE
             !! A instance to store the read data
 
@@ -645,10 +651,10 @@ module inria_medit_reader_interface
             !! A dummy argument for this SUBROUTINE
             !! Receive `STAT` & `ERRMSG`
 
-        end subroutine reset_fields_main_mesh_dimension
+        end subroutine reset_fields_main_mesh_information
 
     end interface
-    ! for `mesh_dimension_t`
+    ! for `mesh_information_t`
 
 
 
@@ -668,55 +674,6 @@ module inria_medit_reader_interface
             !! The return value of this FUNCTION
 
         end function is_header_mesh_version
-
-
-
-        module pure elemental function output_version_number(mesh_version) result(version_number)
-
-            class(mesh_version_t), intent(in) :: mesh_version
-            !! A dummy argument for this FUNCTION
-
-            integer(INT32) :: version_number
-            !! The return value of this FUNCTION
-
-        end function
-
-
-
-        module subroutine read_field_main_mesh_version(data_field, io_unit, text_line, statement_stat)
-
-            class(mesh_version_t), intent(inout) :: data_field
-            !! A dummy argument for this SUBROUTINE
-            !! A instance to store the read data
-
-            type(io_unit_t), intent(in) :: io_unit
-            !! A dummy argument for this SUBROUTINE
-            !! Specify the unit number to read a file
-
-            character(len=*), intent(inout) :: text_line
-            !! A dummy argument for this SUBROUTINE
-            !! Buffer of the read a single text line
-
-            type(statement_stat_t), intent(inout) :: statement_stat
-            !! A dummy argument for this SUBROUTINE
-            !! Receive   `STAT` & `ERRMSG`
-            !! Receive `IOSTAT` &  `IOMSG`
-
-        end subroutine read_field_main_mesh_version
-
-
-
-        module subroutine reset_fields_main_mesh_version(data_field, statement_stat)
-
-            class(mesh_version_t), intent(inout) :: data_field
-            !! A dummy argument for this SUBROUTINE
-            !! A instance to store the read data
-
-            type(statement_stat_t), intent(inout) :: statement_stat
-            !! A dummy argument for this SUBROUTINE
-            !! Receive `STAT` & `ERRMSG`
-
-        end subroutine reset_fields_main_mesh_version
 
     end interface
     ! for `mesh_version_t`
@@ -1202,42 +1159,51 @@ submodule (inria_medit_reader_interface) mesh_dimension_implementation
         is_header = data_field%is_header_core( string(:), STR_HEADER(:) )
     end procedure is_header_mesh_dimension
 
-
-
-    module procedure output_dimension_number
-        dimension_number = mesh_dimension%number
-    end procedure output_dimension_number
+end submodule mesh_dimension_implementation
 
 
 
-    module procedure read_field_main_mesh_dimension
+submodule (inria_medit_reader_interface) mesh_information_implementation
 
-        associate( mesh_dimension => data_field )
+    implicit none
+    contains
 
-            call mesh_dimension%read_header_and_sub_int_data( &!
-                io_unit        = io_unit               , &!
-                text_line      = text_line(:)          , &!
-                sub_data       = mesh_dimension%number , &!
-                statement_stat = statement_stat          &!
+
+
+    module procedure output_number
+        number = mesh_information%number
+    end procedure output_number
+
+
+
+    module procedure read_field_main_mesh_information
+
+        associate( mesh_information => data_field )
+
+            call mesh_information%read_header_and_sub_int_data( &!
+                io_unit        = io_unit                 , &!
+                text_line      = text_line(:)            , &!
+                sub_data       = mesh_information%number , &!
+                statement_stat = statement_stat            &!
             )
 
         end associate
 
-    end procedure read_field_main_mesh_dimension
+    end procedure read_field_main_mesh_information
 
 
 
-    module procedure reset_fields_main_mesh_dimension
+    module procedure reset_fields_main_mesh_information
 
-        associate( mesh_dimension => data_field )
-            mesh_dimension%number = DEFAULT_MESH_DIMENSION_NUMBER
+        associate( mesh_information => data_field )
+            mesh_information%number = DEFAULT_MESH_INFORMATION_NUMBER
         end associate
 
         call statement_stat%reset_fields()
 
-    end procedure reset_fields_main_mesh_dimension
+    end procedure reset_fields_main_mesh_information
 
-end submodule mesh_dimension_implementation
+end submodule mesh_information_implementation
 
 
 
@@ -1255,41 +1221,6 @@ submodule (inria_medit_reader_interface) mesh_version_implementation
     module procedure is_header_mesh_version
         is_header = data_field%is_header_core( string(:), STR_HEADER(:) )
     end procedure is_header_mesh_version
-
-
-
-    module procedure output_version_number
-        version_number = mesh_version%number
-    end procedure output_version_number
-
-
-
-    module procedure read_field_main_mesh_version
-
-        associate( mesh_version => data_field )
-
-            call mesh_version%read_header_and_sub_int_data( &!
-                io_unit        = io_unit             , &!
-                text_line      = text_line(:)        , &!
-                sub_data       = mesh_version%number , &!
-                statement_stat = statement_stat        &!
-            )
-
-        end associate
-
-    end procedure read_field_main_mesh_version
-
-
-
-    module procedure reset_fields_main_mesh_version
-
-        associate( mesh_version => data_field )
-            mesh_version%number = DEFAULT_MESH_VERSION_NUMBER
-        end associate
-
-        call statement_stat%reset_fields()
-
-    end procedure reset_fields_main_mesh_version
 
 end submodule mesh_version_implementation
 

@@ -1,6 +1,7 @@
 module inria_medit_reader_interface
 
     use, intrinsic :: iso_fortran_env , only: INT32
+    use, intrinsic :: iso_fortran_env , only: REAL64
 
     implicit none
 
@@ -169,6 +170,7 @@ module inria_medit_reader_interface
 
 
     type, extends(allocatable_data_field_t), abstract :: data_field_with_reference_number_t
+    ! A base `TYPE` to retain a data field named `Vertices`
 
         integer(INT32), dimension(:), allocatable, private :: reference_number
 
@@ -177,6 +179,36 @@ module inria_medit_reader_interface
         procedure, pass, public :: output_reference_number
 
     end type data_field_with_reference_number_t
+
+
+
+    type, extends(data_field_with_reference_number_t) :: vertices_t
+    ! A `TYPE` to retain a data field named `Vertices`
+
+        type(mesh_dimension_t), pointer, private :: dimension_
+        !! A field to retain the dimension of the each coordinate
+
+        real(REAL64), allocatable, dimension(:,:), private :: coordinate
+        !! A field to retain the coordinate of the each vertex
+        !! `coordinate(1,*)` : x
+        !! `coordinate(2,*)` : y
+        !! `coordinate(3,*)` : z
+
+        contains
+
+        procedure, pass, private :: allocate_fields     => allocate_fields_vertices
+        procedure, pass, private :: associate_dimension => associate_dimension
+        procedure, pass, private :: deallocate_fields   => deallocate_fields_vertices
+        procedure, pass, private :: is_header           => is_header_vertices
+        procedure, pass, public  :: output_x
+        procedure, pass, public  :: output_y
+        procedure, pass, public  :: output_z
+        procedure, pass, private :: read_field_main     => read_field_main_vertices
+        procedure, pass, private :: reset_fields_main   => reset_fields_main_vertices
+
+        generic, public :: output_num_of_vertices => output_num_of_items
+
+    end type
 
 
 
@@ -198,6 +230,9 @@ module inria_medit_reader_interface
 
         type(mesh_dimension_t), public :: mesh_dimension
         !! A field to retain a data field named `Dimension`
+
+        type(vertices_t), public :: vertices
+        !! A field to retain a data field named `Vertices`
 
         contains
 
@@ -731,6 +766,148 @@ module inria_medit_reader_interface
 
 
 
+    ! for `vertices_t`
+    interface
+
+        module pure elemental function is_header_vertices(data_field, string) result(is_header)
+
+            class(vertices_t), intent(in) :: data_field
+            !! A dummy argument for this FUNCTION
+
+            character(len=*), intent(in) :: string
+            !! A dummy argument for this FUNCTION
+            !! The target string of the check
+
+            logical :: is_header
+            !! The return value of this FUNCTION
+
+        end function is_header_vertices
+
+
+
+        module pure elemental function output_x(vertices, index_vertex) result(x)
+
+            class(vertices_t), intent(in) :: vertices
+            !! A dummy argument for this FUNCTION
+
+            integer(INT32), intent(in) :: index_vertex
+            !! A dummy argument for this FUNCTION
+
+            real(REAL64) :: x
+            !! The return value of this FUNCTION
+
+        end function output_x
+
+
+
+        module pure elemental function output_y(vertices, index_vertex) result(y)
+
+            class(vertices_t), intent(in) :: vertices
+            !! A dummy argument for this FUNCTION
+
+            integer(INT32), intent(in) :: index_vertex
+            !! A dummy argument for this FUNCTION
+
+            real(REAL64) :: y
+            !! The return value of this FUNCTION
+
+        end function output_y
+
+
+
+        module pure elemental function output_z(vertices, index_vertex) result(z)
+
+            class(vertices_t), intent(in) :: vertices
+            !! A dummy argument for this FUNCTION
+
+            integer(INT32), intent(in) :: index_vertex
+            !! A dummy argument for this FUNCTION
+
+            real(REAL64) :: z
+            !! The return value of this FUNCTION
+
+        end function output_z
+
+
+
+        module subroutine allocate_fields_vertices(data_field, statement_stat)
+
+            class(vertices_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine allocate_fields_vertices
+
+
+
+        module subroutine associate_dimension(vertices, mesh_dimension)
+
+            class(vertices_t), intent(inout) :: vertices
+            !! A dummy argument for this SUBROUTINE
+
+            class(mesh_dimension_t), intent(in), target :: mesh_dimension
+            !! A dummy argument for this SUBROUTINE
+
+        end subroutine associate_dimension
+
+
+
+        module subroutine deallocate_fields_vertices(data_field, statement_stat)
+
+            class(vertices_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine deallocate_fields_vertices
+
+
+
+        module subroutine read_field_main_vertices(data_field, io_unit, text_line, statement_stat)
+
+            class(vertices_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+            !! A instance to store the read data
+
+            type(io_unit_t), intent(in) :: io_unit
+            !! A dummy argument for this SUBROUTINE
+            !! Specify the unit number to read a file
+
+            character(len=*), intent(inout) :: text_line
+            !! A dummy argument for this SUBROUTINE
+            !! Buffer of the read a single text line
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive   `STAT` & `ERRMSG`
+            !! Receive `IOSTAT` &  `IOMSG`
+
+        end subroutine read_field_main_vertices
+
+
+
+        module subroutine reset_fields_main_vertices(data_field, statement_stat)
+
+            class(vertices_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+            !! A instance to store the read data
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine reset_fields_main_vertices
+
+    end interface
+    ! for `vertices_t`
+
+
+
     interface is_iostat_end
 
         module pure elemental function is_iostat_end_statement_stat(statement_stat)
@@ -1062,6 +1239,29 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
 
 
 
+        ! try to read a data field: `Vertices`
+
+        call inria_medit_file%vertices%associate_dimension(inria_medit_file%mesh_dimension)
+
+        call inria_medit_file%vertices%read_field( &!
+            io_unit        = inria_medit_file%io_unit        , &!
+            text_line      = inria_medit_file%text_line(:)   , &!
+            statement_stat = inria_medit_file%statement_stat   &!
+        )
+
+        if ( .not. inria_medit_file%statement_stat%is_OK() ) then
+
+            inria_medit_file%text_line(:) &!
+            &   =  trim( inria_medit_file%text_line(:) )  &!
+            &   // new_line('')                           &!
+            &   // 'Failed to read a data field: `Vertices`'
+
+            return
+
+        end if
+
+
+
         ! try to close the read file
 
         call inria_medit_file%io_unit%close_file( &!
@@ -1078,8 +1278,13 @@ submodule (inria_medit_reader_interface) inria_medit_file_implementation
 
         associate( statement_stat => inria_medit_file%statement_stat )
 
-            call inria_medit_file% mesh_version   %reset_field(statement_stat)
-            call inria_medit_file% mesh_dimension %reset_field(statement_stat)
+            call inria_medit_file%mesh_version%reset_field(statement_stat)
+            if ( .not. statement_stat%is_OK() ) return
+
+            call inria_medit_file%mesh_dimension%reset_field(statement_stat)
+            if ( .not. statement_stat%is_OK() ) return
+
+            call inria_medit_file%vertices%reset_field(statement_stat)
 
         end associate
 
@@ -1263,3 +1468,195 @@ submodule (inria_medit_reader_interface) statement_stat_implementation
     end procedure reset_fields_statement_stat
 
 end submodule statement_stat_implementation
+
+
+
+submodule (inria_medit_reader_interface) vertices_implementation
+
+    implicit none
+
+    character(len=*), parameter :: STR_HEADER = 'Vertices'
+    !! The header string of this data field
+
+    contains
+
+
+
+    module procedure allocate_fields_vertices
+
+        associate( vertices => data_field )
+
+            allocate( &!
+                vertices%coordinate( &!
+                    vertices%dimension_%output_number() , &!
+                    vertices%output_num_of_vertices()     &!
+                ) , &!
+                stat   = statement_stat%number , &!
+                errmsg = statement_stat%msg      &!
+            )
+
+            if ( .not. statement_stat%is_OK() ) then
+                return
+            end if
+
+
+
+            allocate( &!
+                vertices%reference_number( &!
+                    vertices%output_num_of_vertices() &!
+                ) , &!
+                stat   = statement_stat%number , &!
+                errmsg = statement_stat%msg      &!
+            )
+
+        end associate
+
+    end procedure allocate_fields_vertices
+
+
+
+    module procedure associate_dimension
+
+        if ( associated(vertices%dimension_) ) then
+            nullify(vertices%dimension_)
+        end if
+
+        vertices%dimension_ => mesh_dimension
+
+    end procedure associate_dimension
+
+
+
+    module procedure deallocate_fields_vertices
+
+        associate( vertices => data_field )
+
+            call statement_stat%reset_fields()
+
+
+
+            if ( allocated(data_field%coordinate) ) then
+
+                deallocate( &!
+                    data_field%coordinate          , &!
+                    stat   = statement_stat%number , &!
+                    errmsg = statement_stat%msg      &!
+                )
+
+                if ( .not. statement_stat%is_OK() ) then
+                    return
+                end if
+
+            end if
+
+
+
+            if ( allocated(data_field%reference_number) ) then
+
+                deallocate( &!
+                    data_field%reference_number    , &!
+                    stat   = statement_stat%number , &!
+                    errmsg = statement_stat%msg      &!
+                )
+
+            end if
+
+        end associate
+
+    end procedure deallocate_fields_vertices
+
+
+
+    module procedure is_header_vertices
+        is_header = data_field%is_header_core( string(:), STR_HEADER(:) )
+    end procedure is_header_vertices
+
+
+
+    module procedure output_x; x = vertices%coordinate(1, index_vertex); end procedure
+    module procedure output_y; y = vertices%coordinate(2, index_vertex); end procedure
+    module procedure output_z; z = vertices%coordinate(3, index_vertex); end procedure
+
+
+
+    module procedure read_field_main_vertices
+
+        associate( vertices => data_field )
+
+            ! try to read the number of (recorded) vertices
+            ! as a sub data of the header
+
+            call vertices%read_header_and_sub_int_data( &!
+                io_unit        = io_unit               , &!
+                text_line      = text_line(:)          , &!
+                sub_data       = vertices%num_of_items , &!
+                statement_stat = statement_stat          &!
+            )
+
+            if ( .not. statement_stat%is_OK() ) then
+                return
+            end if
+
+
+
+            ! try to reallocate the allocatable fields of this instance
+
+            call vertices%reallocate_fields(statement_stat)
+
+            if ( .not. statement_stat%is_OK() ) then
+                return
+            end if
+
+
+
+            ! try to read the coordinate/reference number of each vertex
+
+            block
+
+                integer(INT32) :: itr_v
+                !! A support variable for this BLOCK
+
+                do itr_v = 1_INT32, vertices%output_num_of_items()
+
+                    read( &!
+                        unit   = io_unit%output_number() , &!
+                        fmt    = *                       , &!
+                        iostat = statement_stat%number   , &!
+                        iomsg  = statement_stat%msg(:)     &!
+                    ) &!
+                    vertices%coordinate( 1:vertices%dimension_%output_number(), itr_v ) , &!
+                    vertices%reference_number(itr_v)
+
+                    if ( .not. statement_stat%is_OK() ) then
+                        return
+                    end if
+
+                end do
+
+            end block
+
+        end associate
+
+    end procedure read_field_main_vertices
+
+
+
+    module procedure reset_fields_main_vertices
+
+        ! try to deallocate the allocatable fields of this instance
+
+        call data_field%deallocate_fields(statement_stat)
+
+        if ( .not. statement_stat%is_OK() ) then
+            return
+        end if
+
+
+        ! reset the number of (recorded) vertices
+
+        call data_field%reset_num_of_items()
+
+
+    end procedure reset_fields_main_vertices
+
+end submodule vertices_implementation

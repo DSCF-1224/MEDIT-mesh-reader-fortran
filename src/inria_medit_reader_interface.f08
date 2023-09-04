@@ -184,6 +184,10 @@ module inria_medit_reader_interface
 
     type, extends(data_field_with_reference_number_t), abstract :: polytopes_t
 
+        integer(INT32), dimension(:,:), allocatable, private :: index_vertex
+        !! A field to retain the index of the vertices
+        !! constituting each polytope
+
         contains
 
         procedure( output_num_of_vertices_polytopes ), nopass, deferred, private :: output_num_of_vertices

@@ -730,9 +730,9 @@ module inria_medit_reader_interface
 
         module pure elemental function output_num_of_vertices_polytopes() result(num_of_vertices)
 
-            logical :: num_of_vertices
+            integer(INT32) :: num_of_vertices
             !! The return value of this FUNCTION
-            !! the number of vertices constituting a polytopes
+            !! the number of vertices constituting a polytope
 
         end function output_num_of_vertices_polytopes
 

@@ -190,6 +190,9 @@ module inria_medit_reader_interface
 
         contains
 
+        procedure, pass, private :: allocate_fields   => allocate_fields_polytopes
+        procedure, pass, private :: deallocate_fields => deallocate_fields_polytopes
+
         procedure( output_num_of_vertices_polytopes ), nopass, deferred, private :: output_num_of_vertices
 
     end type polytopes_t
@@ -739,6 +742,32 @@ module inria_medit_reader_interface
             !! the number of vertices constituting a polytope
 
         end function output_num_of_vertices_polytopes
+
+
+
+        module subroutine allocate_fields_polytopes(data_field, statement_stat)
+
+            class(polytopes_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine allocate_fields_polytopes
+
+
+
+        module subroutine deallocate_fields_polytopes(data_field, statement_stat)
+
+            class(polytopes_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine deallocate_fields_polytopes
 
     end interface
     ! for `polytopes_t`
@@ -1498,6 +1527,88 @@ submodule (inria_medit_reader_interface) statement_stat_implementation
     end procedure reset_fields_statement_stat
 
 end submodule statement_stat_implementation
+
+
+
+submodule (inria_medit_reader_interface) polytopes_implementation
+
+    implicit none
+    contains
+
+
+
+    module procedure allocate_fields_polytopes
+
+        associate( polytopes => data_field )
+
+            allocate( &!
+                polytopes%index_vertex( &!
+                    polytopes%output_num_of_vertices() , &!
+                    polytopes%output_num_of_items()      &!
+                ) , &!
+                stat   = statement_stat%number , &!
+                errmsg = statement_stat%msg      &!
+            )
+
+            if ( .not. statement_stat%is_OK() ) then
+                return
+            end if
+
+
+
+            allocate( &!
+                polytopes%reference_number( &!
+                    polytopes%output_num_of_items() &!
+                ) , &!
+                stat   = statement_stat%number , &!
+                errmsg = statement_stat%msg      &!
+            )
+
+        end associate
+
+    end procedure allocate_fields_polytopes
+
+
+
+    module procedure deallocate_fields_polytopes
+
+        associate( polytopes => data_field )
+
+            call statement_stat%reset_fields()
+
+
+
+            if ( allocated(data_field%index_vertex) ) then
+
+                deallocate( &!
+                    data_field%index_vertex          , &!
+                    stat   = statement_stat%number , &!
+                    errmsg = statement_stat%msg      &!
+                )
+
+                if ( .not. statement_stat%is_OK() ) then
+                    return
+                end if
+
+            end if
+
+
+
+            if ( allocated(data_field%reference_number) ) then
+
+                deallocate( &!
+                    data_field%reference_number    , &!
+                    stat   = statement_stat%number , &!
+                    errmsg = statement_stat%msg      &!
+                )
+
+            end if
+
+        end associate
+
+    end procedure deallocate_fields_polytopes
+
+end submodule polytopes_implementation
 
 
 

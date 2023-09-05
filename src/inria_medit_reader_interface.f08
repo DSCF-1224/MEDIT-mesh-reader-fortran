@@ -192,6 +192,7 @@ module inria_medit_reader_interface
 
         procedure, pass, private :: allocate_fields   => allocate_fields_polytopes
         procedure, pass, private :: deallocate_fields => deallocate_fields_polytopes
+        procedure, pass, private :: reset_fields_main => reset_fields_main_polytopes
 
         procedure( output_num_of_vertices_polytopes ), nopass, deferred, private :: output_num_of_vertices
 
@@ -768,6 +769,20 @@ module inria_medit_reader_interface
             !! Receive `STAT` & `ERRMSG`
 
         end subroutine deallocate_fields_polytopes
+
+
+
+
+        module subroutine reset_fields_main_polytopes(data_field, statement_stat)
+
+            class(polytopes_t), intent(inout) :: data_field
+            !! A dummy argument for this SUBROUTINE
+
+            type(statement_stat_t), intent(inout) :: statement_stat
+            !! A dummy argument for this SUBROUTINE
+            !! Receive `STAT` & `ERRMSG`
+
+        end subroutine reset_fields_main_polytopes
 
     end interface
     ! for `polytopes_t`
@@ -1607,6 +1622,26 @@ submodule (inria_medit_reader_interface) polytopes_implementation
         end associate
 
     end procedure deallocate_fields_polytopes
+
+
+
+    module procedure reset_fields_main_polytopes
+
+        ! try to deallocate the allocatable fields of this instance
+
+        call data_field%deallocate_fields(statement_stat)
+
+        if ( .not. statement_stat%is_OK() ) then
+            return
+        end if
+
+
+        ! reset the number of (recorded) polytopes
+
+        call data_field%reset_num_of_items()
+
+
+    end procedure reset_fields_main_polytopes
 
 end submodule polytopes_implementation
 
